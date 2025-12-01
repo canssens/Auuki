@@ -1,0 +1,204 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>Web Bluetooth / FTMS BLE Indoor Bike</title>  
+
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.3.3/dist/echarts.js"></script>    
+    <style>
+      td { font-size: 30px; padding: 15px; }
+    </style>
+    
+  </head>
+
+  <body>
+    
+    <h1>Web Bluetooth / FTMS BLE Indoor Bike</h1>
+  
+    <h2>Control</h2>
+    <button id="readFTMSMeasure">Connect FTMS BLE Indoor Bike</button>
+    
+    <table>
+      <tr>
+        <td>SPEED</td>
+        <td>CADENCE</td>
+        <td>POWER</td>
+      </tr>
+      <tr>
+        <td id="valueTabSpeed"></td>
+        <td id="valueTabCadence"></td>
+        <td id="valueTabPower"></td>
+      </tr>
+    </table>
+
+    <div id="graphSpeed" style="width:100%;height: 20vh;"></div>
+    <div id="graphCadence" style="width:100%;height: 20vh;"></div>
+    <div id="graphPower" style="width:100%;height: 20vh;"></div>
+    <div id="graphDistance" style="width:100%;height: 20vh;"></div>
+    <div id="graphHR" style="width:100%;height: 20vh;"></div>
+
+
+
+
+  <script>
+
+    //Init chart
+    var domSpeed = document.getElementById('graphSpeed');
+    var domCadence = document.getElementById('graphCadence');
+    var domPower = document.getElementById('graphPower');
+    var domDistance = document.getElementById('graphDistance');
+    var domHR = document.getElementById('graphHR');
+    
+
+    var chartSpeed = echarts.init(domSpeed, null, { renderer: 'canvas', useDirtyRect: false  });
+    var chartCadence = echarts.init(domCadence, null, { renderer: 'canvas', useDirtyRect: false  });
+    var chartPower = echarts.init(domPower, null, { renderer: 'canvas', useDirtyRect: false  });
+    var chartDistance = echarts.init(domDistance, null, { renderer: 'canvas', useDirtyRect: false  });
+    var chartHR = echarts.init(domHR, null, { renderer: 'canvas', useDirtyRect: false  });
+
+    var option;
+    option = {
+      title: {
+          text: 'Graph'
+        },
+    xAxis: {
+        type: 'category'
+    },
+    yAxis: {
+        type: 'value'
+    },
+    series: [
+        {
+        data: [],
+        type: 'line',
+        smooth: false
+        }
+    ]
+    };
+
+    chartSpeed.setOption(option);
+    chartCadence.setOption(option);
+    chartPower.setOption(option);
+    chartDistance.setOption(option);
+    chartHR.setOption(option);
+    
+
+    window.addEventListener('resize', chartSpeed.resize);
+    window.addEventListener('resize', chartCadence.resize);
+    window.addEventListener('resize', chartPower.resize);
+    window.addEventListener('resize', chartDistance.resize);
+    window.addEventListener('resize', chartHR.resize);
+
+
+
+    var bluetoothDevice;
+    var FTMSMeasureCharacteristic;
+
+    var dataSpeed = [];
+    var dataPower = [];
+    var dataCadence = [];
+    var dataDistance = [];
+    var dataHR = [];
+    
+    
+    
+    /* This function will be called when `readValue` resolves and
+     * characteristic value changes since `characteristicvaluechanged` event
+     * listener has been added. */
+    function handleNotifications(event) {
+      //console.log(event);
+
+      const res = indoorBikeData.decode(event);
+      //console.log(res);
+
+
+
+
+    
+        dataSpeed.push(res.speed);
+        
+
+          dataPower.push(res.power);
+        
+
+        
+          dataCadence.push(res.cadence);
+        
+         // dataHR.push(hr);
+        
+
+        updateCharts();
+        
+      }
+
+      function updateCharts()
+      {
+        option.series[0].data = dataHR;
+        option.title.text = "HR";
+        chartHR.setOption(option);
+
+        option.series[0].data = dataCadence;
+        option.title.text = "Cadence";
+        chartCadence.setOption(option);
+
+        option.series[0].data = dataSpeed;
+        option.title.text = "Speed";
+        chartSpeed.setOption(option);
+
+        option.series[0].data = dataPower;
+        option.title.text = "Power";
+        chartPower.setOption(option);
+
+        option.series[0].data = dataDistance;
+        option.title.text = "Distance";
+        chartDistance.setOption(option);
+
+      }
+    
+
+      function handleOnConnected(event) {
+        console.log(event);
+        controllable.start();
+        controllable.services.trainer.setPowerTarget({power: 200});
+        controllable.services.trainer.characteristics.measurement.startNotificationsWithRetry(handleNotifications)
+      }
+
+
+  var connectable = null;
+  var instance = null;
+    document.querySelector('#readFTMSMeasure').addEventListener('click', function() {
+/*
+deviceType: Device.controllable,
+    filter: webBle.filters.controllable()
+      instance = new Connectable();
+      connectable = instance.connect({requesting: true, watching: false, onConnected: handleOnConnected });
+
+      */
+
+      controllable.connect({requesting: true, watching: false, onConnected: handleOnConnected });
+
+
+  xfFromModule.sub(`ble:connected`,    handleOnConnected);
+
+      //controllableFromModule.start();
+      //controllableFromModule.services.trainer.setPowerTarget({power: 200});
+      //controllableFromModule.services.trainer.characteristics.measurement.startNotificationsWithRetry(handleNotifications)
+      
+      //controllableFromModule.services.trainer.characteristics.measurement.startNotificationsWithRetry(defaultCallback);
+      
+    });
+
+    
+  
+</script>
+<script type="module" src="indexdemo.js"></script>s
+
+
+    
+
+  </body>
+</html>
