@@ -1,12 +1,6 @@
-import { xf } from './functions.js';
-window.xfFromModule = xf;
-
-//import Connectable from './ble/connectable.js';
-//window.Connectable = Connectable;
-
-import {controllable} from './ble/devices.js';
-window.controllable = controllable;
-
+// Import the project
+import Connectable from './ble/connectable.js';
+window.Connectable = Connectable;
 
 import { indoorBikeData } from './ble/ftms/indoor-bike-data.js';
 window.indoorBikeData = indoorBikeData;

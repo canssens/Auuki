@@ -110,29 +110,15 @@
      * characteristic value changes since `characteristicvaluechanged` event
      * listener has been added. */
     function handleNotifications(event) {
-      //console.log(event);
 
       const res = indoorBikeData.decode(event);
       //console.log(res);
-
-
-
-
-    
-        dataSpeed.push(res.speed);
-        
-
-          dataPower.push(res.power);
-        
-
-        
-          dataCadence.push(res.cadence);
-        
-         // dataHR.push(hr);
-        
-
-        updateCharts();
-        
+ 
+      dataSpeed.push(res.speed);
+      dataPower.push(res.power);
+      dataCadence.push(res.cadence);
+      // dataHR.push(hr);
+      updateCharts();        
       }
 
       function updateCharts()
@@ -161,36 +147,33 @@
     
 
       function handleOnConnected(event) {
-        console.log(event);
-        controllable.start();
-        controllable.services.trainer.setPowerTarget({power: 200});
-        controllable.services.trainer.characteristics.measurement.startNotificationsWithRetry(handleNotifications)
+        //connectable
+        onnectableDevice.services.trainer.start();
+        onnectableDevice.services.trainer.setPowerTarget({power: 200});
+        onnectableDevice.services.trainer.characteristics.measurement.startNotificationsWithRetry(handleNotifications)
       }
 
+      function handleOnData(event) {
+        //console.log(event);
+        }
 
-  var connectable = null;
+
+  var onnectableDevice = null;
   var instance = null;
-    document.querySelector('#readFTMSMeasure').addEventListener('click', function() {
-/*
-deviceType: Device.controllable,
-    filter: webBle.filters.controllable()
-      instance = new Connectable();
-      connectable = instance.connect({requesting: true, watching: false, onConnected: handleOnConnected });
+  document.querySelector('#readFTMSMeasure').addEventListener('click', function() {
 
-      */
-
-      controllable.connect({requesting: true, watching: false, onConnected: handleOnConnected });
-
-
-  xfFromModule.sub(`ble:connected`,    handleOnConnected);
-
-      //controllableFromModule.start();
-      //controllableFromModule.services.trainer.setPowerTarget({power: 200});
-      //controllableFromModule.services.trainer.characteristics.measurement.startNotificationsWithRetry(handleNotifications)
-      
-      //controllableFromModule.services.trainer.characteristics.measurement.startNotificationsWithRetry(defaultCallback);
-      
+      connectAsync();
+ 
     });
+
+    async function connectAsync() {
+      const filter = {filters: [
+     {services: ['00001826-0000-1000-8000-00805f9b34fb']}
+     ]};
+      const device = await navigator.bluetooth.requestDevice(filter);
+      onnectableDevice = Connectable({device, onConnected: handleOnConnected, onData: handleOnData });
+      await onnectableDevice.connect({ }); 
+    }
 
     
   
